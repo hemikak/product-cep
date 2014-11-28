@@ -22,8 +22,8 @@
 
     <test name="cep-tests" preserve-order="true" parallel="false">
         <!--<packages>-->
-            <!--<package name="org.wso2.carbon.integration.test.services.*"/>-->
-            <!--<package name="org.wso2.carbon.integration.test.processflow.*"/>-->
+        <!--<package name="org.wso2.carbon.integration.test.services.*"/>-->
+        <!--<package name="org.wso2.carbon.integration.test.processflow.*"/>-->
         <!--</packages>-->
 
         <classes>
@@ -34,7 +34,7 @@
             <class name="org.wso2.carbon.integration.test.processflow.JMSTextMessageTestCase"/>
             <class name="org.wso2.carbon.integration.test.patches.CEP883TestCase"/>
             <class name="org.wso2.carbon.integration.test.processflow.HTTPXMLMessageTestCase"/>
-            <class name="org.wso2.carbon.integration.test.processflow.PassThroughWithWSO2Event"/>
+            <class name="org.wso2.carbon.integration.test.processflow.PassThroughWithWso2Event"/>
         </classes>
 
     </test>
