@@ -141,8 +141,6 @@ public class DataSourceHandler extends HttpServlet {
 
 				MapHelper.getMap().put(streamData.getFrameID(), streamData);
 			}
-
-			log.info("Received frame ID : " + Integer.toString(streamData.getFrameID()));
 		} catch (DecoderException exception) {
 			log.error(exception);
 			exception.printStackTrace();
@@ -150,9 +148,6 @@ public class DataSourceHandler extends HttpServlet {
 			log.error(exception);
 			exception.printStackTrace();
 		} catch (IOException exception) {
-			log.error(exception);
-			exception.printStackTrace();
-		} catch (Exception exception) {
 			log.error(exception);
 			exception.printStackTrace();
 		}

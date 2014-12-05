@@ -27,9 +27,9 @@
 	<property name="class.dir" value="${temp.dir}/classes" />
 	<property name="main-class" value="org.wso2.carbon.sample.objectdetection.ObjectDetectionClient" />
 
-	<property name="source" value="${resources.dir}/video/pedestrians.mp4" />
+	<property name="source" value="${resources.dir}/video/tunnel.mp4" />
 	<property name="cascade" value="${resources.dir}/cascades/haarcascade_fullbody.xml" />
-	<property name="maxFrameCount" value="15" />
+	<property name="maxFrameCount" value="20" />
 	<property name="preprocess" value="true" />
 	<property name="skipFrames" value="1" />
 	<property name="host" value="localhost" />
@@ -81,7 +81,11 @@
 		<echo>To configure source, cascade, no. of frames, allow preprocessing, no. of frames to skip, host, port, username and password use -Dsource=xxxx -Dcascade=xxxx -DmaxFrameCount=xxxx -Dpreprocess=xxxx -DskipFrames=xxxx -Dhost=xx -Dport=xx -Dusername=xxxx -Dpassword=xxxx. 
 		</echo>
 		<java classname="${main-class}" classpathref="javac.classpath" fork="true">
+<<<<<<< HEAD
 			<sysproperty key="java.library.path" path="${nativeDir}"/>
+=======
+
+>>>>>>> Added new sample. Sample contains new artifacts, new lib files, 2 new producers and 1 new consumer
 			<arg value="${source}" />
 			<arg value="${cascade}" />
 			<arg value="${maxFrameCount}" />

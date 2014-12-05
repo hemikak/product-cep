@@ -24,7 +24,6 @@ import nu.pattern.OpenCV;
 import org.apache.commons.lang.NumberUtils;
 import org.apache.commons.ssl.util.Hex;
 import org.apache.log4j.Logger;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.core.MatOfRect;
@@ -56,21 +55,12 @@ public class ObjectDetectionClient {
 	/** Stream version. */
 	public static final String VERSION1 = "1.0.0";
 
-	/** Image to Hex encoding format */
 	public static final String encodingFormat = ".jpg";
 
 	// loading native libraries for opencv
 	static {
-		try {
-			System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		} catch (UnsatisfiedLinkError ex) {
-			try {
-				OpenCV.loadLibrary();
-			} catch (Exception exception) {
-				log.error("Error in loading OpenCV library 2.4.9");
-				log.error(exception);
-			}
-		}
+		// System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		OpenCV.loadLibrary();
 	}
 
 	/**
@@ -103,7 +93,7 @@ public class ObjectDetectionClient {
 	                                      InterruptedException {
 
 		KeyStoreUtil.setTrustStoreParams();
-
+		
 		String source = args[0];
 		String cascadeFile = args[1];
 		int maxFrameCount = Integer.parseInt(args[2]);
@@ -149,7 +139,7 @@ public class ObjectDetectionClient {
 					if (vCap.read(frame)) {
 						long currentTime = System.currentTimeMillis();
 						Mat frameClone = frame.clone();
-
+						
 						// pre-processing
 						if (preprocess) {
 							Imgproc.cvtColor(frame, frameClone, Imgproc.COLOR_RGB2GRAY);
@@ -172,8 +162,8 @@ public class ObjectDetectionClient {
 							String croppedImageHex = matToHex(croppedImage);
 							// payload data
 							Object[] payloadData =
-							                       new Object[] { currentTime, tempFrameCount,
-							                                     source, croppedImageHex,
+							                       new Object[] { currentTime, tempFrameCount, source,
+							                                     croppedImageHex,
 							                                     croppedImage.type(),
 							                                     croppedImage.width(),
 							                                     croppedImage.height(),
@@ -188,7 +178,6 @@ public class ObjectDetectionClient {
 							                 new Event(streamID, System.currentTimeMillis(), null,
 							                           null, payloadData);
 							dataPublisher.publish(eventOne);
-							System.out.println("published");
 						}
 
 						// delaying to fit siddhi window size in execution
@@ -198,9 +187,8 @@ public class ObjectDetectionClient {
 						log.error("Frame was empty!");
 					}
 
-					// skipping frames. propId = 1 (CAP_PROP_POS_FRAMES).
-					// outcome varies with operating system.
-					// vCap.set(1, vCap.get(1) + skipFrames);
+					// skipping frames. propId = 1 (CAP_PROP_POS_FRAMES)
+					vCap.set(1, vCap.get(1) + skipFrames);
 				}
 			} else {
 				log.error("Cascade was empty!");

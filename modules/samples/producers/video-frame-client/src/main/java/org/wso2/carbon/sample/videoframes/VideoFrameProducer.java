@@ -24,17 +24,18 @@ import nu.pattern.OpenCV;
 import org.apache.commons.lang.NumberUtils;
 import org.apache.commons.ssl.util.Hex;
 import org.apache.log4j.Logger;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfByte;
 import org.opencv.highgui.Highgui;
 import org.opencv.highgui.VideoCapture;
+import org.opencv.objdetect.CascadeClassifier;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.commons.Event;
 import org.wso2.carbon.databridge.commons.exception.AuthenticationException;
 import org.wso2.carbon.databridge.commons.exception.DifferentStreamDefinitionAlreadyDefinedException;
 import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionException;
+import org.wso2.carbon.databridge.commons.exception.NoStreamDefinitionExistException;
 import org.wso2.carbon.databridge.commons.exception.StreamDefinitionException;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 
@@ -57,16 +58,8 @@ public class VideoFrameProducer {
 
 	// loading native libraries for opencv
 	static {
-		try {
-			System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		} catch (UnsatisfiedLinkError ex) {
-			try {
-				OpenCV.loadLibrary();
-			} catch (Exception exception) {
-				log.error("Error in loading OpenCV library 2.4.9");
-				log.error(exception);
-			}
-		}
+		// System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		OpenCV.loadLibrary();
 	}
 
 	/**
@@ -97,7 +90,7 @@ public class VideoFrameProducer {
 	                                      StreamDefinitionException,
 	                                      DifferentStreamDefinitionAlreadyDefinedException,
 	                                      InterruptedException {
-
+		
 		KeyStoreUtil.setTrustStoreParams();
 		String source = args[0];
 		String cascadeFile = args[1];
@@ -142,7 +135,7 @@ public class VideoFrameProducer {
 					// payload data
 					Object[] payloadData =
 					                       new Object[] { currentTime, tempFrameCount, source,
-					                                     croppedImageHex, cascadeFile };
+					                                      croppedImageHex, cascadeFile };
 
 					// logging
 					log.info("Sending frame " + Integer.toString(tempFrameCount) +
@@ -158,8 +151,8 @@ public class VideoFrameProducer {
 					log.error("Frame was empty!");
 				}
 
-				// skipping frames. propId = 1 (CAP_PROP_POS_FRAMES). outcome varies with operating system.
-				// vCap.set(1, vCap.get(1) + skipFrames);
+				// skipping frames. propId = 1 (CAP_PROP_POS_FRAMES)
+				vCap.set(1, vCap.get(1) + skipFrames);
 			}
 		}
 
