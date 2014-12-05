@@ -52,6 +52,8 @@
         <module>foo-data</module>
         <module>sensor-stats</module>
         <module>analytics-stats</module>
+        <module>object-detection-client</module>
+        <module>video-frame-client</module>
     </modules>
 
 </project>
