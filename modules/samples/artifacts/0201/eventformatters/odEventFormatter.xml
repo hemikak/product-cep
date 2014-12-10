@@ -4,6 +4,6 @@
   <from streamName="org.wso2.sample.objectdetection.output" version="1.0.0"/>
   <mapping customMapping="disable" type="json"/>
   <to eventAdaptorName="odHTTPOuput" eventAdaptorType="http">
-    <property name="http.url">http://localhost:9765/objectdetection/imageshow</property>
+    <property name="http.url">http://localhost:9763/objectdetection/imageshow</property>
   </to>
 </eventFormatter>
