@@ -12,15 +12,4 @@
 		<servlet-name>Image Display</servlet-name>
 		<servlet-class>org.wso2.carbon.http.servlet.objectdetector.ImageDisplay</servlet-class>
 	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>Data Source Handler</servlet-name>
-		<url-pattern>/imageshow</url-pattern>
-	</servlet-mapping>
-	
-	<servlet-mapping>
-		<servlet-name>Image Display</servlet-name>
-		<url-pattern>/displayImage</url-pattern>
-	</servlet-mapping>
-	
 </web-app>
