@@ -16,9 +16,7 @@
 ~ specific language governing permissions and limitations
 ~ under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
 
@@ -37,23 +35,14 @@
              <groupId>org.seleniumhq.selenium</groupId>
              <artifactId>selenium-java</artifactId>
              <scope>compile</scope>
-             <exclusions>
-                 <exclusion>
-                     <groupId>org.seleniumhq.selenium</groupId>
-                     <artifactId>selenium-android-driver</artifactId>
-                 </exclusion>
-             </exclusions>
          </dependency>
          <dependency>
              <groupId>com.opera</groupId>
              <artifactId>operadriver</artifactId>
-             <scope>compile</scope>
-             <exclusions>
-                 <exclusion>
-                     <groupId>org.seleniumhq.selenium</groupId>
-                     <artifactId>selenium-remote-driver</artifactId>
-                 </exclusion>
-             </exclusions>
+         </dependency>
+         <dependency>
+             <groupId>org.apache.log4j.wso2</groupId>
+             <artifactId>log4j</artifactId>
          </dependency>
      </dependencies>
 </project>
