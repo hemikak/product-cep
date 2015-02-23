@@ -62,8 +62,9 @@ public class VideoFrameProducer {
 		} catch (UnsatisfiedLinkError ex) {
 			try {
 				OpenCV.loadLibrary();
-			} catch (Exception exe) {
-				log.error(exe);
+			} catch (Exception exception) {
+				log.error("Error in loading OpenCV library 2.4.9");
+				log.error(exception);
 			}
 		}
 	}
