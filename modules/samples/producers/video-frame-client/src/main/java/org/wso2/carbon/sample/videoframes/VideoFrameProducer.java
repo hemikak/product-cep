@@ -93,37 +93,41 @@ public class VideoFrameProducer {
         // Gets the stream ID to which the data should be published.
         String streamID = getStreamID(dataPublisher);
 
-        FrameGrabber grabber = new OpenCVFrameGrabber(source);
-        // Start grabber to capture video
-        grabber.start();
+	    try {
+		    FrameGrabber grabber = new OpenCVFrameGrabber(source);
+		    // Start grabber to capture video
+		    grabber.start();
 
-        //Declare frame as IplImage
-        IplImage frame;
-        int tempFrameCount = 0;
-        // Loop till maximum amount of frames are reached. Else keep looping till user exits.
-        while (maxFrameCount == -1 || tempFrameCount < maxFrameCount) {
-            // Grabs a frame from the video
-            frame = grabber.grab();
-            if (null != frame) {
-                tempFrameCount++;
-                long currentTime = System.currentTimeMillis();
-                String croppedImageHex = imageToHex(frame);
-                // The payload data to be published
-                Object[] payloadData = new Object[]{currentTime, tempFrameCount, source,
-                                                    croppedImageHex, cascadeFilePath};
+		    //Declare frame as IplImage
+		    IplImage frame;
+		    int tempFrameCount = 0;
+		    // Loop till maximum amount of frames are reached. Else keep looping till user exits.
+		    while (maxFrameCount == -1 || tempFrameCount < maxFrameCount) {
+                // Grabs a frame from the video
+                frame = grabber.grab();
+                if (null != frame) {
+                    tempFrameCount++;
+                    long currentTime = System.currentTimeMillis();
+                    String croppedImageHex = imageToHex(frame);
+                    // The payload data to be published
+                    Object[] payloadData = new Object[]{currentTime, tempFrameCount, source,
+                                                        croppedImageHex, cascadeFilePath};
 
-                // Logging collected information
-                log.info("Sending frame " + Integer.toString(tempFrameCount) +
-                         " : Found frame at " + Long.toString(currentTime));
+                    // Logging collected information
+                    log.info("Sending frame " + Integer.toString(tempFrameCount) +
+                             " : Found frame at " + Long.toString(currentTime));
 
-                // Creating an event and publishing
-                Event eventOne = new Event(streamID, System.currentTimeMillis(), null, null,
-                                           payloadData);
-                dataPublisher.publish(eventOne);
+                    // Creating an event and publishing
+                    Event eventOne = new Event(streamID, System.currentTimeMillis(), null, null,
+                                               payloadData);
+                    dataPublisher.publish(eventOne);
+                }
             }
-        }
+	    } catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
+		    log.error("There was an error in reading the video input");
+	    }
 
-        // Stops publishing data
+	    // Stops publishing data
         dataPublisher.stop();
     }
 
