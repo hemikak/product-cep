@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2015, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  * 
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -15,20 +15,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.wso2.carbon.sample.videoframes;
 
-import java.net.MalformedURLException;
-
-import nu.pattern.OpenCV;
-
-import org.apache.commons.lang.NumberUtils;
 import org.apache.commons.ssl.util.Hex;
 import org.apache.log4j.Logger;
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfByte;
-import org.opencv.highgui.Highgui;
-import org.opencv.highgui.VideoCapture;
+import org.bytedeco.javacv.FrameGrabber;
+import org.bytedeco.javacv.OpenCVFrameGrabber;
 import org.wso2.carbon.databridge.agent.thrift.DataPublisher;
 import org.wso2.carbon.databridge.agent.thrift.exception.AgentException;
 import org.wso2.carbon.databridge.commons.Event;
@@ -38,194 +31,155 @@ import org.wso2.carbon.databridge.commons.exception.MalformedStreamDefinitionExc
 import org.wso2.carbon.databridge.commons.exception.StreamDefinitionException;
 import org.wso2.carbon.databridge.commons.exception.TransportException;
 
+import java.net.MalformedURLException;
+import java.nio.ByteBuffer;
+
+import static org.bytedeco.javacpp.opencv_core.IplImage;
+
 /**
- * Object detecting client using OpenCV
+ * Object detecting client using JavaCV
  */
 public class VideoFrameProducer {
 
-	/** The logger. */
-	private static Logger log = Logger.getLogger(VideoFrameProducer.class);
+    /**
+     * The logger.
+     */
+    private static Logger log = Logger.getLogger(VideoFrameProducer.class);
 
-	/** Stream name. */
-	public static final String STREAM_NAME = "org.wso2.sample.video.frames";
+    /**
+     * The stream name in which the data will be published to
+     */
+    public static final String STREAM_NAME = "org.wso2.sample.video.frames";
 
-	/** Stream version. */
-	public static final String VERSION1 = "1.0.0";
+    /**
+     * The stream version in which the data will be published to
+     */
+    public static final String VERSION = "1.0.0";
 
-	/** The Constant encodingFormat. */
-	public static final String encodingFormat = ".jpg";
 
-	// loading native libraries for opencv
-	static {
-		try {
-			System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-		} catch (UnsatisfiedLinkError ex) {
-			try {
-				OpenCV.loadLibrary();
-			} catch (Exception exception) {
-				log.error("Error in loading OpenCV library 2.4.9");
-				log.error(exception);
-			}
-		}
-	}
+    /**
+     * The main method.
+     *
+     * @param args the arguments
+     * @throws MalformedURLException                            the malformed url exception
+     * @throws AgentException                                   the agent exception
+     * @throws AuthenticationException                          the authentication exception
+     * @throws TransportException                               the transport exception
+     * @throws MalformedStreamDefinitionException               the malformed stream definition exception
+     * @throws StreamDefinitionException                        the stream definition exception
+     * @throws DifferentStreamDefinitionAlreadyDefinedException the different stream definition already defined exception
+     * @throws InterruptedException                             the interrupted exception
+     */
+    public static void main(String[] args) throws MalformedURLException, AgentException,
+                                                  AuthenticationException, TransportException,
+                                                  MalformedStreamDefinitionException,
+                                                  StreamDefinitionException,
+                                                  DifferentStreamDefinitionAlreadyDefinedException,
+                                                  InterruptedException {
 
-	/**
-	 * The main method.
-	 *
-	 * @param args
-	 *            the arguments
-	 * @throws MalformedURLException
-	 *             the malformed url exception
-	 * @throws AgentException
-	 *             the agent exception
-	 * @throws AuthenticationException
-	 *             the authentication exception
-	 * @throws TransportException
-	 *             the transport exception
-	 * @throws MalformedStreamDefinitionException
-	 *             the malformed stream definition exception
-	 * @throws StreamDefinitionException
-	 *             the stream definition exception
-	 * @throws DifferentStreamDefinitionAlreadyDefinedException
-	 *             the different stream definition already defined exception
-	 * @throws InterruptedException
-	 *             the interrupted exception
-	 */
-	public static void main(String[] args) throws MalformedURLException, AgentException,
-	                                      AuthenticationException, TransportException,
-	                                      MalformedStreamDefinitionException,
-	                                      StreamDefinitionException,
-	                                      DifferentStreamDefinitionAlreadyDefinedException,
-	                                      InterruptedException {
+        // Setting trust store system properties
+        KeyStoreUtil.setTrustStoreParams();
+        String source = args[0];
+        String cascadeFilePath = args[1];
+        int maxFrameCount = Integer.parseInt(args[2]);
+        String host = args[3];
+        String port = args[4];
+        String username = args[5];
+        String password = args[6];
 
-		KeyStoreUtil.setTrustStoreParams();
-		String source = args[0];
-		String cascadeFile = args[1];
-		int maxFrameCount = Integer.parseInt(args[2]);
-		double skipFrames = Double.parseDouble(args[3]);
-		String host = args[4];
-		String port = args[5];
-		String username = args[6];
-		String password = args[7];
+        // new data publisher
+        DataPublisher dataPublisher = new DataPublisher("tcp://" + host + ":" + port, username,
+                                                        password);
+        // Gets the stream ID to which the data should be published.
+        String streamID = getStreamID(dataPublisher);
 
-		// new data publisher
-		DataPublisher dataPublisher =
-		                              new DataPublisher("tcp://" + host + ":" + port, username,
-		                                                password);
-		// getting stream id
-		String streamID = getStreamID(dataPublisher);
+        FrameGrabber grabber = new OpenCVFrameGrabber(source);
+        // Start grabber to capture video
+        grabber.start();
 
-		// opening a video source for to capture frames.
-		// an integer would represent a source device attached to the
-		// machine.
-		// a file path can also be given.
-		// rtsp links can also be used at video source.
-		VideoCapture vCap = new VideoCapture();
-		if (NumberUtils.isNumber(source)) {
-			vCap.open(Integer.parseInt(source));
-		} else {
-			vCap.open(source);
-		}
+        //Declare frame as IplImage
+        IplImage frame;
+        int tempFrameCount = 0;
+        // Loop till maximum amount of frames are reached. Else keep looping till user exits.
+        while (maxFrameCount == -1 || tempFrameCount < maxFrameCount) {
+            // Grabs a frame from the video
+            frame = grabber.grab();
+            if (null != frame) {
+                tempFrameCount++;
+                long currentTime = System.currentTimeMillis();
+                String croppedImageHex = imageToHex(frame);
+                // The payload data to be published
+                Object[] payloadData = new Object[]{currentTime, tempFrameCount, source,
+                                                    croppedImageHex, cascadeFilePath};
 
-		// if video source is valid
-		if (!vCap.isOpened()) {
-			log.error("Incorrect source provided : " + source);
-		} else {
-			int tempFrameCount = 0;
-			Mat frame = new Mat();
-			log.info("Valid source found : " + source);
-			while (maxFrameCount == -1 || tempFrameCount < maxFrameCount) {
-				if (vCap.read(frame)) {
-					tempFrameCount++;
-					long currentTime = System.currentTimeMillis();
-					String croppedImageHex = matToHex(frame);
-					// payload data
-					Object[] payloadData =
-					                       new Object[] { currentTime, tempFrameCount, source,
-					                                     croppedImageHex, cascadeFile };
+                // Logging collected information
+                log.info("Sending frame " + Integer.toString(tempFrameCount) +
+                         " : Found frame at " + Long.toString(currentTime));
 
-					// logging
-					log.info("Sending frame " + Integer.toString(tempFrameCount) +
-					         " : Found frame at " + Long.toString(currentTime));
+                // Creating an event and publishing
+                Event eventOne = new Event(streamID, System.currentTimeMillis(), null, null,
+                                           payloadData);
+                dataPublisher.publish(eventOne);
+            }
+        }
 
-					// creating event and publishing
-					Event eventOne =
-					                 new Event(streamID, System.currentTimeMillis(), null, null,
-					                           payloadData);
-					dataPublisher.publish(eventOne);
+        // Stops publishing data
+        dataPublisher.stop();
+    }
 
-				} else {
-					log.error("Frame was empty!");
-				}
+    /**
+     * Converting a javacv image to hex.
+     *
+     * @param capturedImage the captured image from the input video stream
+     * @return the hex string
+     */
+    private static String imageToHex(IplImage capturedImage) {
+        ByteBuffer byteBuffer = capturedImage.getByteBuffer();
+        byte[] imageArray = new byte[byteBuffer.remaining()];
+        byteBuffer.get(imageArray);
+        return Hex.encode(imageArray);
+    }
 
-				// skipping frames. propId = 1 (CAP_PROP_POS_FRAMES). outcome varies with operating system.
-				// vCap.set(1, vCap.get(1) + skipFrames);
-			}
-		}
+    /**
+     * Gets the stream ID to publish data. If stream ID does not exist, create a new stream.
+     *
+     * @param dataPublisher the data publisher
+     * @return the stream id
+     * @throws AgentException                                   the agent exception
+     * @throws MalformedStreamDefinitionException               the malformed stream definition exception
+     * @throws StreamDefinitionException                        the stream definition exception
+     * @throws DifferentStreamDefinitionAlreadyDefinedException the different stream definition already defined exception
+     */
+    private static String getStreamID(DataPublisher dataPublisher)
+            throws AgentException,
+                   MalformedStreamDefinitionException,
+                   StreamDefinitionException,
+                   DifferentStreamDefinitionAlreadyDefinedException {
+        // Stream definition
+        // // timestamp - time which the object was identified
+        // // frame_id - unique id for the frame
+        // // camera_id - source
+        // // image - cropped image of the detected object sent as a hex
+        // // cascade - the file path to the cascade file
+        log.info("Creating stream " + STREAM_NAME + ":" + VERSION);
+        String streamId =
+                dataPublisher.defineStream("{" +
+                                           "  'name':'" +
+                                           STREAM_NAME +
+                                           "'," +
+                                           "  'version':'" +
+                                           VERSION +
+                                           "'," +
+                                           "  'nickName': 'Video_Frame_Feeding'," +
+                                           "  'description': 'A sample for Video Frame Feeding'," +
+                                           "  'payloadData':[" +
+                                           "          {'name':'timestamp','type':'LONG'}," +
+                                           "          {'name':'frame_id','type':'INT'}," +
+                                           "          {'name':'camera_id','type':'STRING'}," +
+                                           "          {'name':'image','type':'STRING'}," +
+                                           "          {'name':'cascade','type':'STRING'}" +
+                                           "  ]" + "}");
 
-		dataPublisher.stop();
-	}
-
-	/**
-	 * Mat to hex string.
-	 *
-	 * @param croppedImage
-	 *            the cropped image
-	 * @return the hex string
-	 */
-	private static String matToHex(Mat croppedImage) {
-		// mat to byte array
-		MatOfByte bytemat = new MatOfByte();
-		Highgui.imencode(encodingFormat, croppedImage, bytemat);
-		byte[] bytes = bytemat.toArray();
-
-		return Hex.encode(bytes);
-	}
-
-	/**
-	 * Gets the stream id.
-	 *
-	 * @param dataPublisher
-	 *            the data publisher
-	 * @return the stream id
-	 * @throws AgentException
-	 *             the agent exception
-	 * @throws MalformedStreamDefinitionException
-	 *             the malformed stream definition exception
-	 * @throws StreamDefinitionException
-	 *             the stream definition exception
-	 * @throws DifferentStreamDefinitionAlreadyDefinedException
-	 *             the different stream definition already defined exception
-	 */
-	private static String getStreamID(DataPublisher dataPublisher)
-	                                                              throws AgentException,
-	                                                              MalformedStreamDefinitionException,
-	                                                              StreamDefinitionException,
-	                                                              DifferentStreamDefinitionAlreadyDefinedException {
-		// Stream definition
-		// // timestamp - time which the object was identified
-		// // frame_id - unique id for the frame
-		// // camera_id - source
-		// // image - cropped image of the detected object sent as a hex
-		log.info("Creating stream " + STREAM_NAME + ":" + VERSION1);
-		String streamId =
-		                  dataPublisher.defineStream("{" +
-		                                             "  'name':'" +
-		                                             STREAM_NAME +
-		                                             "'," +
-		                                             "  'version':'" +
-		                                             VERSION1 +
-		                                             "'," +
-		                                             "  'nickName': 'Video_Frame_Feeding'," +
-		                                             "  'description': 'A sample for Video Frame Feeding'," +
-		                                             "  'payloadData':[" +
-		                                             "          {'name':'timestamp','type':'LONG'}," +
-		                                             "          {'name':'frame_id','type':'INT'}," +
-		                                             "          {'name':'camera_id','type':'STRING'}," +
-		                                             "          {'name':'image','type':'STRING'}," +
-		                                             "          {'name':'cascade','type':'STRING'}" +
-		                                             "  ]" + "}");
-
-		return streamId;
-	}
+        return streamId;
+    }
 }
