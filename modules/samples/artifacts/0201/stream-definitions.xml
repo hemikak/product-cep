@@ -38,56 +38,6 @@
 
 	<streamDefinition>
 		{
-		"name": "org.wso2.sample.objectdetection.data",
-		"version": "1.0.0",
-		"nickName": "Object_Detection_Monitoring",
-		"description": "A sample for Object Detection Monitoring",
-		"payloadData": [
-		{
-		"name": "timestamp",
-		"type": "LONG"
-		},
-		{
-		"name":
-		"frame_id",
-		"type": "INT"
-		},
-		{
-		"name": "camera_id",
-		"type": "STRING"
-		},
-		{
-		"name": "image",
-		"type": "STRING"
-		},
-		{
-		"name": "image_type",
-		"type": "INT"
-		},
-		{
-		"name": "image_width",
-		"type": "INT"
-		},
-		{
-		"name": "image_height",
-		"type": "INT"
-		},
-		{
-		"name": "encoding_format",
-		"type": "STRING"
-		},
-		{
-		"name":
-		"cascade",
-		"type": "STRING"
-		}
-		]
-		}
-
-	</streamDefinition>
-
-	<streamDefinition>
-		{
 		"name": "org.wso2.sample.objectdetection.output",
 		"version": "1.0.0",
 		"nickName": "",

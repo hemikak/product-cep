@@ -3,5 +3,5 @@
 	DO NOT DELETE this file since this file is needed when event builder/event 
 	formatter configurations are created using default values. -->
 <inputEventAdaptor name="DefaultWSO2EventInputAdaptor"
-	statistics="disable" trace="disable" type="wso2event"
-	xmlns="http://wso2.org/carbon/eventadaptormanager" />
+                   statistics="disable" trace="disable" type="wso2event"
+                   xmlns="http://wso2.org/carbon/eventadaptormanager"/>
