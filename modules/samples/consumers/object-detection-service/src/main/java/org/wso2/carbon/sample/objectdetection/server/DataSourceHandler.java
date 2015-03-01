@@ -20,7 +20,6 @@ package org.wso2.carbon.sample.objectdetection.server;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -38,7 +37,6 @@ import org.wso2.carbon.sample.objectdetection.server.utilities.MapHelper;
 /**
  * The HTTP servlet to receive data. Class DataSourceHandler.
  */
-@WebServlet("/imageshow")
 public class DataSourceHandler extends HttpServlet {
 
 	/** The Constant serialVersionUID. */
@@ -66,7 +64,7 @@ public class DataSourceHandler extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 	                                                                              throws ServletException,
 	                                                                              IOException {
-		this.addToMap(request, response);
+		this.addToMap(request);
 	}
 
 	/**
@@ -85,18 +83,16 @@ public class DataSourceHandler extends HttpServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 	                                                                            throws ServletException,
 	                                                                            IOException {
-		this.addToMap(request, response);
+		this.addToMap(request);
 	}
 
 	/**
 	 * Adds stream data to the map.
-	 *
-	 * @param request
+	 *  @param request
 	 *            the request
-	 * @param response
-	 *            the response
-	 */
-	private synchronized void addToMap(HttpServletRequest request, HttpServletResponse response) {
+	 *
+     */
+	private synchronized void addToMap(HttpServletRequest request) {
 		try {
 			// capturing payloadData and parsing json
 			JSONParser jsonParser = new JSONParser();
@@ -139,6 +135,7 @@ public class DataSourceHandler extends HttpServlet {
 					MapHelper.getMap().clear();
 				}
 
+                log.info("Receiving Frame ID : " + streamData.getFrameID());
 				MapHelper.getMap().put(streamData.getFrameID(), streamData);
 			}
 		} catch (DecoderException exception) {

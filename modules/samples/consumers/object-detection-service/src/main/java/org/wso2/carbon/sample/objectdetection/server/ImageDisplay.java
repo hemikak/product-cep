@@ -34,7 +34,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
-@WebServlet("/displayImage")
 public class ImageDisplay extends HttpServlet {
 
 	/**

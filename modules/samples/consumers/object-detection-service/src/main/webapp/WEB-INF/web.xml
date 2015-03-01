@@ -6,11 +6,11 @@
 	<display-name>Archetype Created Web Application</display-name>
 	<servlet>
 		<servlet-name>Data Source Handler</servlet-name>
-		<servlet-class>org.wso2.carbon.http.servlet.objectdetector.DataSourceHandler</servlet-class>
+		<servlet-class>org.wso2.carbon.sample.objectdetection.server.DataSourceHandler</servlet-class>
 	</servlet>
 	<servlet>
 		<servlet-name>Image Display</servlet-name>
-		<servlet-class>org.wso2.carbon.http.servlet.objectdetector.ImageDisplay</servlet-class>
+		<servlet-class>org.wso2.carbon.sample.objectdetection.server.ImageDisplay</servlet-class>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>Data Source Handler</servlet-name>

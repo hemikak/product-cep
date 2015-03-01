@@ -27,8 +27,7 @@
 		"type": "STRING"
 		},
 		{
-		"name":
-		"cascade",
+		"name": "cascade",
 		"type": "STRING"
 		}
 		]
